@@ -478,6 +478,181 @@ function ResourceLink({ res, color }) {
   );
 }
 
+const STORAGE_KEY = 'ml-athlete-progress';
+
+function ProgressTracker() {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [sessions, setSessions] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  });
+
+  const save = (updated) => {
+    setSessions(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  };
+
+  const markDay = (dateStr) => {
+    const current = sessions[dateStr];
+    const next = !current ? '1hr' : current === '1hr' ? '3hr' : null;
+    const updated = { ...sessions };
+    if (next) updated[dateStr] = next; else delete updated[dateStr];
+    save(updated);
+  };
+
+  const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const getFirstDay = (y, m) => new Date(y, m, 1).getDay();
+
+  const totalDays = getDaysInMonth(currentYear, currentMonth);
+  const firstDay = getFirstDay(currentYear, currentMonth);
+  const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
+
+  const allSessions = Object.values(sessions);
+  const total3hr = allSessions.filter(v => v === '3hr').length;
+  const total1hr = allSessions.filter(v => v === '1hr').length;
+  const totalHours = total3hr * 3 + total1hr;
+
+  // streak calculation
+  let streak = 0;
+  const d = new Date(today);
+  while (true) {
+    const key = d.toISOString().split('T')[0];
+    if (sessions[key]) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+
+  const phase = Math.min(6, Math.floor(totalHours / (3 * 30)) + 1);
+  const progressPct = Math.min(100, Math.round((totalHours / (3 * 180)) * 100));
+
+  return (
+    <div style={{ marginTop: 60, borderTop: '1px solid #1a1a1a', paddingTop: 40 }}>
+      <div style={{ fontSize: 9, letterSpacing: '0.3em', color: '#555', marginBottom: 6 }}>
+        DAILY TRAINING LOG
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: '#e2e8f0', marginBottom: 4 }}>
+        Progress Calendar
+      </div>
+      <div style={{ fontSize: 12, color: '#666', marginBottom: 28 }}>
+        Click a day once to mark 1hr session, click again for 3hr, click again to clear.
+      </div>
+
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 32 }}>
+        {[
+          { label: 'CURRENT STREAK', value: `${streak}d`, color: '#f97316' },
+          { label: 'TOTAL HOURS', value: `${totalHours}h`, color: '#a855f7' },
+          { label: 'FULL SESSIONS', value: total3hr, color: '#06b6d4' },
+          { label: 'OVERALL PROGRESS', value: `${progressPct}%`, color: '#10b981' },
+        ].map(s => (
+          <div key={s.label} style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '14px 16px' }}>
+            <div style={{ fontSize: 9, letterSpacing: '0.2em', color: '#555', marginBottom: 6 }}>{s.label}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress Bar */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <span style={{ fontSize: 10, color: '#555', letterSpacing: '0.15em' }}>PHASE {phase} OF 6</span>
+          <span style={{ fontSize: 10, color: '#f97316' }}>{totalHours} / 540 hours</span>
+        </div>
+        <div style={{ background: '#111', height: 6, width: '100%' }}>
+          <div style={{ background: '#f97316', height: '100%', width: `${progressPct}%`, transition: 'width 0.4s' }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+          {['P1','P2','P3','P4','P5','P6'].map((p, i) => (
+            <span key={p} style={{ fontSize: 9, color: i < phase ? '#f97316' : '#333', letterSpacing: '0.1em' }}>{p}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Calendar */}
+      <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: 24 }}>
+        {/* Month Nav */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <button
+            onClick={() => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); } else setCurrentMonth(m => m - 1); }}
+            style={{ background: 'none', border: '1px solid #2a2a2a', color: '#aaa', padding: '4px 12px', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit' }}
+          >‹</button>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#ddd', letterSpacing: '0.1em' }}>
+            {monthName} {currentYear}
+          </span>
+          <button
+            onClick={() => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1); } else setCurrentMonth(m => m + 1); }}
+            style={{ background: 'none', border: '1px solid #2a2a2a', color: '#aaa', padding: '4px 12px', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit' }}
+          >›</button>
+        </div>
+
+        {/* Day Labels */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
+          {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+            <div key={d} style={{ textAlign: 'center', fontSize: 9, color: '#444', letterSpacing: '0.1em', paddingBottom: 4 }}>{d}</div>
+          ))}
+        </div>
+
+        {/* Days Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+          {Array.from({ length: totalDays }).map((_, i) => {
+            const dayNum = i + 1;
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+            const todayStr = today.toISOString().split('T')[0];
+            const session = sessions[dateStr];
+            const isToday = dateStr === todayStr;
+            const isFuture = dateStr > todayStr;
+
+            const bg = session === '3hr' ? '#f97316' : session === '1hr' ? '#f9731650' : isToday ? '#1a1a1a' : '#111';
+            const border = isToday ? '1px solid #f97316' : '1px solid #1e1e1e';
+
+            return (
+              <div
+                key={dayNum}
+                onClick={() => !isFuture && markDay(dateStr)}
+                title={session ? `${session} logged` : isToday ? 'Click to log session' : ''}
+                style={{
+                  background: bg,
+                  border,
+                  aspectRatio: '1',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: isFuture ? 'default' : 'pointer',
+                  opacity: isFuture ? 0.2 : 1,
+                  transition: 'all 0.15s',
+                  gap: 1
+                }}
+              >
+                <span style={{ fontSize: 10, color: session === '3hr' ? '#000' : '#888', fontWeight: isToday ? 700 : 400 }}>{dayNum}</span>
+                {session && <span style={{ fontSize: 7, color: session === '3hr' ? '#000' : '#f97316', letterSpacing: '0.05em' }}>{session}</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 16, borderTop: '1px solid #1a1a1a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 12, height: 12, background: '#f97316' }} />
+            <span style={{ fontSize: 10, color: '#666' }}>3hr full session</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 12, height: 12, background: '#f9731650', border: '1px solid #1e1e1e' }} />
+            <span style={{ fontSize: 10, color: '#666' }}>1hr partial session</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 12, height: 12, background: '#1a1a1a', border: '1px solid #f97316' }} />
+            <span style={{ fontSize: 10, color: '#666' }}>today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TrainingPlan() {
   const [activePhase, setActivePhase] = useState(null);
   const [activeWeek, setActiveWeek] = useState(null);
@@ -990,6 +1165,8 @@ export default function TrainingPlan() {
             ))}
           </div>
         </div>
+
+            <ProgressTracker />
 
         <div
           style={{
