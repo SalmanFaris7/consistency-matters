@@ -520,12 +520,12 @@ function ProgressTracker() {
   };
 
   const markDay = (dateStr) => {
-    const current = sessions[dateStr];
-    const next = !current ? '1hr' : current === '1hr' ? '3hr' : null;
-    const updated = { ...sessions };
-    if (next) updated[dateStr] = next; else delete updated[dateStr];
-    save(updated);
-  };
+  const current = sessions[dateStr];
+  const next = !current ? '1hr' : current === '1hr' ? '2hr' : current === '2hr' ? '3hr' : null;
+  const updated = { ...sessions };
+  if (next) updated[dateStr] = next; else delete updated[dateStr];
+  save(updated);
+};
 
   const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
   const getFirstDay = (y, m) => new Date(y, m, 1).getDay();
@@ -536,9 +536,9 @@ function ProgressTracker() {
 
   const allSessions = Object.values(sessions);
   const total3hr = allSessions.filter(v => v === '3hr').length;
-  const total1hr = allSessions.filter(v => v === '1hr').length;
-  const totalHours = total3hr * 3 + total1hr;
-
+const total2hr = allSessions.filter(v => v === '2hr').length;
+const total1hr = allSessions.filter(v => v === '1hr').length;
+const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
   let streak = 0;
   const d = new Date(today);
   while (true) {
@@ -626,7 +626,7 @@ function ProgressTracker() {
             const session = sessions[dateStr];
             const isToday = dateStr === todayStr;
             const isFuture = dateStr > todayStr;
-            const bg = session === '3hr' ? '#f97316' : session === '1hr' ? '#f9731640' : isToday ? '#1a1a1a' : '#111';
+            const bg = session === '3hr' ? '#f97316' : session === '2hr' ? '#f97316aa' : session === '1hr' ? '#f9731640' : isToday ? '#1a1a1a' : '#111';
             return (
               <div
                 key={dayNum}
