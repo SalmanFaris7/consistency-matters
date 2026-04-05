@@ -662,23 +662,23 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
   );
 }
 
-const [dark, setDark] = useState(true);
-const t = {
-  bg: dark ? t.bg : '#f5f5f5',
-  bg2: dark ? t.bg2 : '#ffffff',
-  bg3: dark ? t.bg3 : '#eeeeee',
-  bg4: dark ? t.bg4 : '#e5e5e5',
-  border: dark ? t.border : '#d4d4d4',
-  border2: dark ? t.border2 : '#cccccc',
-  text: dark ? t.text : '#111111',
-  text2: dark ? t.text2 : '#333',
-  text3: dark ? t.text3 : '#555',
-  text4: dark ? t.text4 : '#777',
-  text5: dark ? t.text5 : '#999',
-  text6: dark ? t.text6 : '#aaa',
-};
 
 export default function TrainingPlan() {
+  const [dark, setDark] = useState(true);
+  const t = {
+    bg: dark ? '#0a0a0a' : '#f5f5f5',
+    bg2: dark ? '#0d0d0d' : '#ffffff',
+    bg3: dark ? '#111111' : '#eeeeee',
+    bg4: dark ? '#141414' : '#e5e5e5',
+    border: dark ? '#1e1e1e' : '#d4d4d4',
+    border2: dark ? '#1a1a1a' : '#cccccc',
+    text: dark ? '#e2e8f0' : '#111111',
+    text2: dark ? '#cccccc' : '#333333',
+    text3: dark ? '#888888' : '#555555',
+    text4: dark ? '#666666' : '#777777',
+    text5: dark ? '#555555' : '#999999',
+    text6: dark ? '#444444' : '#aaaaaa',
+  };
   const [activePhase, setActivePhase] = useState(null);
   const [activeWeek, setActiveWeek] = useState(null);
 
