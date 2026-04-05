@@ -478,7 +478,7 @@ function ResourceLink({ res, color }) {
   );
 }
 
-const DB_URL = 'https://console.firebase.google.com/u/0/project/mlathlete/database/mlathlete-default-rtdb/data/~2Fsessions.json';
+const DB_URL = 'https://mlathlete-default-rtdb.europe-west1.firebasedatabase.app/sessions.json';
 // ↑ paste your Firebase URL here, keep the /sessions.json at the end
 
 function ProgressTracker() {
