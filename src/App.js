@@ -451,7 +451,7 @@ const rules = [
   },
 ];
 
-function ResourceLink({ res, color }) {
+function ResourceLink({ res, color, t }) {
   const [hovered, setHovered] = useState(false);
   const open = () => window.open(res.url, '_blank');
   const enter = () => setHovered(true);
@@ -481,7 +481,7 @@ function ResourceLink({ res, color }) {
 const DB_URL = 'https://mlathlete-default-rtdb.europe-west1.firebasedatabase.app/sessions.json';
 // ↑ paste your Firebase URL here, keep the /sessions.json at the end
 
-function ProgressTracker() {
+function ProgressTracker({ t }) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -662,6 +662,22 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
   );
 }
 
+const [dark, setDark] = useState(true);
+const t = {
+  bg: dark ? t.bg : '#f5f5f5',
+  bg2: dark ? t.bg2 : '#ffffff',
+  bg3: dark ? t.bg3 : '#eeeeee',
+  bg4: dark ? t.bg4 : '#e5e5e5',
+  border: dark ? t.border : '#d4d4d4',
+  border2: dark ? t.border2 : '#cccccc',
+  text: dark ? t.text : '#111111',
+  text2: dark ? t.text2 : '#333',
+  text3: dark ? t.text3 : '#555',
+  text4: dark ? t.text4 : '#777',
+  text5: dark ? t.text5 : '#999',
+  text6: dark ? t.text6 : '#aaa',
+};
+
 export default function TrainingPlan() {
   const [activePhase, setActivePhase] = useState(null);
   const [activeWeek, setActiveWeek] = useState(null);
@@ -746,6 +762,18 @@ export default function TrainingPlan() {
             3 hours daily → 6 months → job-ready for frontier robotics AI.
             Progressive overload. Every phase builds on the last.
           </p>
+          <button
+  onClick={() => setDark(d => !d)}
+  style={{
+    marginTop: 20, background: 'none',
+    border: `1px solid ${t.border}`,
+    color: t.text3, padding: '6px 16px',
+    fontSize: 11, cursor: 'pointer',
+    fontFamily: 'inherit', letterSpacing: '0.15em'
+  }}
+>
+  {dark ? '☀ LIGHT MODE' : '☾ DARK MODE'}
+</button>
           <div
             style={{
               display: 'flex',
@@ -873,7 +901,7 @@ export default function TrainingPlan() {
                   border: `1px solid ${phase.color}30`,
                   borderTop: 'none',
                   padding: '24px',
-                  background: '#0b0b0b',
+                  background: t.bg2,
                 }}
               >
                 <div
@@ -1025,7 +1053,7 @@ export default function TrainingPlan() {
                     {activeWeek === `${phase.id}-${wi}` && (
                       <div
                         style={{
-                          background: '#0e0e0e',
+                          background: t.bg2,
                           border: '1px solid #1a1a1a',
                           borderTop: 'none',
                           padding: 18,
@@ -1097,6 +1125,7 @@ export default function TrainingPlan() {
                                 key={ri}
                                 res={res}
                                 color={phase.color}
+                                t={t}
                               />
                             ))}
                           </div>
@@ -1135,7 +1164,7 @@ export default function TrainingPlan() {
                 style={{
                   border: '1px solid #1a1a1a',
                   padding: '16px 18px',
-                  background: '#0c0c0c',
+                  background: t.bg2,
                 }}
               >
                 <div
@@ -1175,7 +1204,7 @@ export default function TrainingPlan() {
           </div>
         </div>
 
-            <ProgressTracker />
+            <ProgressTracker t={t} />
 
         <div
           style={{
