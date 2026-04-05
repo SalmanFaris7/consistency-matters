@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const phases = [
   {
@@ -478,20 +478,45 @@ function ResourceLink({ res, color }) {
   );
 }
 
-const STORAGE_KEY = 'ml-athlete-progress';
+const DB_URL = 'https://console.firebase.google.com/u/0/project/mlathlete/database/mlathlete-default-rtdb/data/~2Fsessions.json';
+// ↑ paste your Firebase URL here, keep the /sessions.json at the end
 
 function ProgressTracker() {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [sessions, setSessions] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-    catch { return {}; }
-  });
+  const [sessions, setSessions] = useState({});
+  const [syncing, setSyncing] = useState(false);
+  const [status, setStatus] = useState('');
 
-  const save = (updated) => {
+  // Load from Firebase on mount
+  useEffect(() => {
+    const load = async () => {
+      setSyncing(true);
+      try {
+        const res = await fetch(DB_URL);
+        const data = await res.json();
+        if (data) setSessions(data);
+      } catch { setStatus('⚠ could not load — check connection'); }
+      setSyncing(false);
+    };
+    load();
+  }, []);
+
+  const save = async (updated) => {
     setSessions(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setSyncing(true);
+    setStatus('');
+    try {
+      await fetch(DB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+      setStatus('✓ synced');
+      setTimeout(() => setStatus(''), 2000);
+    } catch { setStatus('⚠ sync failed'); }
+    setSyncing(false);
   };
 
   const markDay = (dateStr) => {
@@ -514,7 +539,6 @@ function ProgressTracker() {
   const total1hr = allSessions.filter(v => v === '1hr').length;
   const totalHours = total3hr * 3 + total1hr;
 
-  // streak calculation
   let streak = 0;
   const d = new Date(today);
   while (true) {
@@ -524,21 +548,25 @@ function ProgressTracker() {
   }
 
   const phase = Math.min(6, Math.floor(totalHours / (3 * 30)) + 1);
-  const progressPct = Math.min(100, Math.round((totalHours / (3 * 180)) * 100));
+  const progressPct = Math.min(100, Math.round((totalHours / 540) * 100));
 
   return (
     <div style={{ marginTop: 60, borderTop: '1px solid #1a1a1a', paddingTop: 40 }}>
-      <div style={{ fontSize: 9, letterSpacing: '0.3em', color: '#555', marginBottom: 6 }}>
-        DAILY TRAINING LOG
-      </div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: '#e2e8f0', marginBottom: 4 }}>
-        Progress Calendar
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+        <div>
+          <div style={{ fontSize: 9, letterSpacing: '0.3em', color: '#555', marginBottom: 6 }}>DAILY TRAINING LOG</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#e2e8f0' }}>Progress Calendar</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {syncing && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316', animation: 'pulse 1s infinite' }} />}
+          <span style={{ fontSize: 10, color: status.startsWith('✓') ? '#10b981' : '#f97316', letterSpacing: '0.1em' }}>{status}</span>
+        </div>
       </div>
       <div style={{ fontSize: 12, color: '#666', marginBottom: 28 }}>
-        Click a day once to mark 1hr session, click again for 3hr, click again to clear.
+        Syncs across all your devices. Click once → 1hr, twice → 3hr, three times → clear.
       </div>
 
-      {/* Stats Row */}
+      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 32 }}>
         {[
           { label: 'CURRENT STREAK', value: `${streak}d`, color: '#f97316' },
@@ -553,7 +581,7 @@ function ProgressTracker() {
         ))}
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress bar */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 10, color: '#555', letterSpacing: '0.15em' }}>PHASE {phase} OF 6</span>
@@ -571,81 +599,62 @@ function ProgressTracker() {
 
       {/* Calendar */}
       <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: 24 }}>
-        {/* Month Nav */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <button
             onClick={() => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); } else setCurrentMonth(m => m - 1); }}
             style={{ background: 'none', border: '1px solid #2a2a2a', color: '#aaa', padding: '4px 12px', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit' }}
           >‹</button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#ddd', letterSpacing: '0.1em' }}>
-            {monthName} {currentYear}
-          </span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#ddd', letterSpacing: '0.1em' }}>{monthName} {currentYear}</span>
           <button
             onClick={() => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1); } else setCurrentMonth(m => m + 1); }}
             style={{ background: 'none', border: '1px solid #2a2a2a', color: '#aaa', padding: '4px 12px', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit' }}
           >›</button>
         </div>
 
-        {/* Day Labels */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
           {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
             <div key={d} style={{ textAlign: 'center', fontSize: 9, color: '#444', letterSpacing: '0.1em', paddingBottom: 4 }}>{d}</div>
           ))}
         </div>
 
-        {/* Days Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
-          {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+          {Array.from({ length: firstDay }).map((_, i) => <div key={`e-${i}`} />)}
           {Array.from({ length: totalDays }).map((_, i) => {
             const dayNum = i + 1;
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+            const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
             const todayStr = today.toISOString().split('T')[0];
             const session = sessions[dateStr];
             const isToday = dateStr === todayStr;
             const isFuture = dateStr > todayStr;
-
-            const bg = session === '3hr' ? '#f97316' : session === '1hr' ? '#f9731650' : isToday ? '#1a1a1a' : '#111';
-            const border = isToday ? '1px solid #f97316' : '1px solid #1e1e1e';
-
+            const bg = session === '3hr' ? '#f97316' : session === '1hr' ? '#f9731640' : isToday ? '#1a1a1a' : '#111';
             return (
               <div
                 key={dayNum}
                 onClick={() => !isFuture && markDay(dateStr)}
-                title={session ? `${session} logged` : isToday ? 'Click to log session' : ''}
                 style={{
                   background: bg,
-                  border,
-                  aspectRatio: '1',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  border: isToday ? '1px solid #f97316' : '1px solid #1e1e1e',
+                  aspectRatio: '1', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
                   cursor: isFuture ? 'default' : 'pointer',
-                  opacity: isFuture ? 0.2 : 1,
-                  transition: 'all 0.15s',
-                  gap: 1
+                  opacity: isFuture ? 0.2 : 1, transition: 'all 0.15s', gap: 1
                 }}
               >
                 <span style={{ fontSize: 10, color: session === '3hr' ? '#000' : '#888', fontWeight: isToday ? 700 : 400 }}>{dayNum}</span>
-                {session && <span style={{ fontSize: 7, color: session === '3hr' ? '#000' : '#f97316', letterSpacing: '0.05em' }}>{session}</span>}
+                {session && <span style={{ fontSize: 7, color: session === '3hr' ? '#000' : '#f97316' }}>{session}</span>}
               </div>
             );
           })}
         </div>
 
-        {/* Legend */}
         <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 16, borderTop: '1px solid #1a1a1a' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 12, height: 12, background: '#f97316' }} />
             <span style={{ fontSize: 10, color: '#666' }}>3hr full session</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 12, height: 12, background: '#f9731650', border: '1px solid #1e1e1e' }} />
-            <span style={{ fontSize: 10, color: '#666' }}>1hr partial session</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 12, height: 12, background: '#1a1a1a', border: '1px solid #f97316' }} />
-            <span style={{ fontSize: 10, color: '#666' }}>today</span>
+            <div style={{ width: 12, height: 12, background: '#f9731640', border: '1px solid #1e1e1e' }} />
+            <span style={{ fontSize: 10, color: '#666' }}>1hr partial</span>
           </div>
         </div>
       </div>
