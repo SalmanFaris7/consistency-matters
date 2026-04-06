@@ -464,7 +464,7 @@ function ResourceLink({ res, color, t }) {
       style={{
         display: 'block',
         padding: '8px 12px',
-        background: '#141414',
+        background: t.bg4,
         border: '1px solid ' + (hovered ? color + '40' : '#1e1e1e'),
         marginBottom: 6,
         fontSize: 11,
@@ -551,18 +551,18 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
   const progressPct = Math.min(100, Math.round((totalHours / 540) * 100));
 
   return (
-    <div style={{ marginTop: 60, borderTop: '1px solid #1a1a1a', paddingTop: 40 }}>
+    <div style={{ marginTop: 60, borderTop: `1px solid ${t.border2}`, paddingTop: 40 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
         <div>
-          <div style={{ fontSize: 9, letterSpacing: '0.3em', color: '#555', marginBottom: 6 }}>DAILY TRAINING LOG</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#e2e8f0' }}>Progress Calendar</div>
+          <div style={{ fontSize: 9, letterSpacing: '0.3em', color: t.text5, marginBottom: 6 }}>DAILY TRAINING LOG</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: t.text }}>Progress Calendar</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {syncing && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316', animation: 'pulse 1s infinite' }} />}
           <span style={{ fontSize: 10, color: status.startsWith('✓') ? '#10b981' : '#f97316', letterSpacing: '0.1em' }}>{status}</span>
         </div>
       </div>
-      <div style={{ fontSize: 12, color: '#666', marginBottom: 28 }}>
+      <div style={{ fontSize: 12, color: t.text4, marginBottom: 28 }}>
         Syncs across all your devices. Click once → 1hr, twice → 3hr, three times → clear.
       </div>
 
@@ -574,8 +574,8 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
           { label: 'FULL SESSIONS', value: total3hr, color: '#06b6d4' },
           { label: 'OVERALL PROGRESS', value: `${progressPct}%`, color: '#10b981' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '14px 16px' }}>
-            <div style={{ fontSize: 9, letterSpacing: '0.2em', color: '#555', marginBottom: 6 }}>{s.label}</div>
+          <div key={s.label} style={{ background: t.bg2, border: `1px solid ${t.border2}`, padding: '14px 16px' }}>
+            <div style={{ fontSize: 9, letterSpacing: '0.2em', color: t.text5, marginBottom: 6 }}>{s.label}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
           </div>
         ))}
@@ -584,10 +584,10 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
       {/* Progress bar */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 10, color: '#555', letterSpacing: '0.15em' }}>PHASE {phase} OF 6</span>
+          <span style={{ fontSize: 10, color: t.text5, letterSpacing: '0.15em' }}>PHASE {phase} OF 6</span>
           <span style={{ fontSize: 10, color: '#f97316' }}>{totalHours} / 540 hours</span>
         </div>
-        <div style={{ background: '#111', height: 6, width: '100%' }}>
+        <div style={{ background: t.bg3, height: 6, width: '100%' }}>
           <div style={{ background: '#f97316', height: '100%', width: `${progressPct}%`, transition: 'width 0.4s' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
@@ -598,7 +598,7 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
       </div>
 
       {/* Calendar */}
-      <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: 24 }}>
+      <div style={{ background: t.bg2, border: `1px solid ${t.border2}`, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <button
             onClick={() => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); } else setCurrentMonth(m => m - 1); }}
@@ -613,7 +613,7 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
           {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-            <div key={d} style={{ textAlign: 'center', fontSize: 9, color: '#444', letterSpacing: '0.1em', paddingBottom: 4 }}>{d}</div>
+            <div key={d} style={{ textAlign: 'center', fontSize: 9, color: t.text6, letterSpacing: '0.1em', paddingBottom: 4 }}>{d}</div>
           ))}
         </div>
 
@@ -626,35 +626,35 @@ const totalHours = total3hr * 3 + total2hr * 2 + total1hr;
             const session = sessions[dateStr];
             const isToday = dateStr === todayStr;
             const isFuture = dateStr > todayStr;
-            const bg = session === '3hr' ? '#f97316' : session === '2hr' ? '#f97316aa' : session === '1hr' ? '#f9731640' : isToday ? '#1a1a1a' : '#111';
+            const bg = session === '3hr' ? '#f97316' : session === '2hr' ? '#f97316aa' : session === '1hr' ? '#f9731640' : isToday ? '#1a1a1a' : t.bg3;
             return (
               <div
                 key={dayNum}
                 onClick={() => !isFuture && markDay(dateStr)}
                 style={{
                   background: bg,
-                  border: isToday ? '1px solid #f97316' : '1px solid #1e1e1e',
+                  border: isToday ? '1px solid #f97316' : `1px solid ${t.border}`,
                   aspectRatio: '1', display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',
                   cursor: isFuture ? 'default' : 'pointer',
                   opacity: isFuture ? 0.2 : 1, transition: 'all 0.15s', gap: 1
                 }}
               >
-                <span style={{ fontSize: 10, color: session === '3hr' ? '#000' : '#888', fontWeight: isToday ? 700 : 400 }}>{dayNum}</span>
+                <span style={{ fontSize: 10, color: session === '3hr' ? '#000' : t.text3, fontWeight: isToday ? 700 : 400 }}>{dayNum}</span>
                 {session && <span style={{ fontSize: 7, color: session === '3hr' ? '#000' : '#f97316' }}>{session}</span>}
               </div>
             );
           })}
         </div>
 
-        <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 16, borderTop: '1px solid #1a1a1a' }}>
+        <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${t.border2}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 12, height: 12, background: '#f97316' }} />
-            <span style={{ fontSize: 10, color: '#666' }}>3hr full session</span>
+            <span style={{ fontSize: 10, color: t.text4 }}>3hr full session</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 12, height: 12, background: '#f9731640', border: '1px solid #1e1e1e' }} />
-            <span style={{ fontSize: 10, color: '#666' }}>1hr partial</span>
+            <div style={{ width: 12, height: 12, background: '#f9731640', border: `1px solid ${t.border}` }} />
+            <span style={{ fontSize: 10, color: t.text4 }}>1hr partial</span>
           </div>
         </div>
       </div>
@@ -672,9 +672,9 @@ export default function TrainingPlan() {
     bg4: dark ? t.bg4 : '#e5e5e5',
     border: dark ? t.border : '#d4d4d4',
     border2: dark ? t.border2 : '#cccccc',
-    text: dark ? t.text : '#111111',
+    text: dark ? t.text : t.bg3,
     text2: dark ? t.text2 : '#333',
-    text3: dark ? t.text3 : '#555',
+    text3: dark ? t.text3 : t.text5,
     text4: dark ? t.text4 : '#777',
     text5: dark ? t.text5 : '#999',
     text6: dark ? t.text6 : '#aaa',
@@ -691,15 +691,15 @@ export default function TrainingPlan() {
     <div
       style={{
         fontFamily: "'Courier New', 'Lucida Console', monospace",
-        background: '#0a0a0a',
+        background: t.bg,
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: t.text,
       }}
     >
       {/* Header */}
       <div
         style={{
-          borderBottom: '1px solid #1e1e1e',
+          borderBottom: `1px solid ${t.border}`,
           padding: '40px 32px 32px',
           background: 'linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%)',
         }}
@@ -717,7 +717,7 @@ export default function TrainingPlan() {
               style={{
                 fontSize: 11,
                 letterSpacing: '0.3em',
-                color: '#666',
+                color: t.text4,
                 textTransform: 'uppercase',
               }}
             >
@@ -752,7 +752,7 @@ export default function TrainingPlan() {
           </h1>
           <p
             style={{
-              color: '#888',
+              color: t.text3,
               fontSize: 13,
               maxWidth: 520,
               lineHeight: 1.7,
@@ -837,7 +837,7 @@ export default function TrainingPlan() {
                   activePhase === phase.id ? phase.color + '60' : '#1e1e1e'
                 }`,
                 background:
-                  activePhase === phase.id ? `${phase.color}06` : '#0d0d0d',
+                  activePhase === phase.id ? `${phase.color}06` : t.bg2,
                 padding: '20px 24px',
                 cursor: 'pointer',
                 display: 'flex',
@@ -862,12 +862,12 @@ export default function TrainingPlan() {
                     >
                       {phase.title}
                     </span>
-                    <span style={{ fontSize: 10, color: '#444' }}>—</span>
+                    <span style={{ fontSize: 10, color: t.text6 }}>—</span>
                     <span
                       style={{
                         fontSize: 10,
                         letterSpacing: '0.15em',
-                        color: '#555',
+                        color: t.text5,
                       }}
                     >
                       {phase.duration.toUpperCase()}
@@ -877,7 +877,7 @@ export default function TrainingPlan() {
                     style={{
                       fontSize: 16,
                       fontWeight: 700,
-                      color: '#e2e8f0',
+                      color: t.text,
                       marginTop: 2,
                     }}
                   >
@@ -887,7 +887,7 @@ export default function TrainingPlan() {
               </div>
               <span
                 style={{
-                  color: activePhase === phase.id ? phase.color : '#444',
+                  color: activePhase === phase.id ? phase.color : t.text6,
                   fontSize: 18,
                 }}
               >
@@ -914,7 +914,7 @@ export default function TrainingPlan() {
                 >
                   <div
                     style={{
-                      background: '#111',
+                      background: t.bg3,
                       padding: 16,
                       borderLeft: `3px solid ${phase.color}`,
                     }}
@@ -930,14 +930,14 @@ export default function TrainingPlan() {
                       PHASE GOAL
                     </div>
                     <div
-                      style={{ fontSize: 12, color: '#ccc', lineHeight: 1.7 }}
+                      style={{ fontSize: 12, color: t.text2, lineHeight: 1.7 }}
                     >
                       {phase.goal}
                     </div>
                   </div>
                   <div
                     style={{
-                      background: '#111',
+                      background: t.bg3,
                       padding: 16,
                       borderLeft: '3px solid #333',
                     }}
@@ -946,7 +946,7 @@ export default function TrainingPlan() {
                       style={{
                         fontSize: 9,
                         letterSpacing: '0.2em',
-                        color: '#666',
+                        color: t.text4,
                         marginBottom: 8,
                       }}
                     >
@@ -955,7 +955,7 @@ export default function TrainingPlan() {
                     <div
                       style={{
                         fontSize: 12,
-                        color: '#888',
+                        color: t.text3,
                         lineHeight: 1.7,
                         fontStyle: 'italic',
                       }}
@@ -967,7 +967,7 @@ export default function TrainingPlan() {
 
                 <div
                   style={{
-                    background: '#111',
+                    background: t.bg3,
                     padding: 16,
                     marginBottom: 24,
                     borderLeft: `3px solid ${phase.color}40`,
@@ -977,7 +977,7 @@ export default function TrainingPlan() {
                     style={{
                       fontSize: 9,
                       letterSpacing: '0.2em',
-                      color: '#666',
+                      color: t.text4,
                       marginBottom: 12,
                     }}
                   >
@@ -1017,8 +1017,8 @@ export default function TrainingPlan() {
                         background:
                           activeWeek === `${phase.id}-${wi}`
                             ? '#161616'
-                            : '#111',
-                        border: '1px solid #1e1e1e',
+                            : t.bg3,
+                        border: `1px solid ${t.border}`,
                         padding: '14px 18px',
                         cursor: 'pointer',
                         display: 'flex',
@@ -1031,7 +1031,7 @@ export default function TrainingPlan() {
                           style={{
                             fontSize: 9,
                             letterSpacing: '0.2em',
-                            color: '#555',
+                            color: t.text5,
                           }}
                         >
                           {week.week} —{' '}
@@ -1046,7 +1046,7 @@ export default function TrainingPlan() {
                           {week.focus}
                         </span>
                       </div>
-                      <span style={{ color: '#444', fontSize: 12 }}>
+                      <span style={{ color: t.text6, fontSize: 12 }}>
                         {activeWeek === `${phase.id}-${wi}` ? '▲' : '▼'}
                       </span>
                     </div>
@@ -1054,7 +1054,7 @@ export default function TrainingPlan() {
                       <div
                         style={{
                           background: t.bg2,
-                          border: '1px solid #1a1a1a',
+                          border: `1px solid ${t.border2}`,
                           borderTop: 'none',
                           padding: 18,
                         }}
@@ -1114,7 +1114,7 @@ export default function TrainingPlan() {
                               style={{
                                 fontSize: 9,
                                 letterSpacing: '0.2em',
-                                color: '#666',
+                                color: t.text4,
                                 marginBottom: 12,
                               }}
                             >
@@ -1145,7 +1145,7 @@ export default function TrainingPlan() {
             style={{
               fontSize: 9,
               letterSpacing: '0.3em',
-              color: '#555',
+              color: t.text5,
               marginBottom: 20,
             }}
           >
@@ -1162,7 +1162,7 @@ export default function TrainingPlan() {
               <div
                 key={r.n}
                 style={{
-                  border: '1px solid #1a1a1a',
+                  border: `1px solid ${t.border2}`,
                   padding: '16px 18px',
                   background: t.bg2,
                 }}
@@ -1193,7 +1193,7 @@ export default function TrainingPlan() {
                       {r.rule}
                     </div>
                     <div
-                      style={{ fontSize: 11, color: '#666', lineHeight: 1.6 }}
+                      style={{ fontSize: 11, color: t.text4, lineHeight: 1.6 }}
                     >
                       {r.detail}
                     </div>
@@ -1210,14 +1210,14 @@ export default function TrainingPlan() {
           style={{
             marginTop: 40,
             paddingTop: 24,
-            borderTop: '1px solid #1a1a1a',
+            borderTop: `1px solid ${t.border2}`,
             display: 'flex',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: 12,
           }}
         >
-          <div style={{ fontSize: 10, color: '#444', letterSpacing: '0.15em' }}>
+          <div style={{ fontSize: 10, color: t.text6, letterSpacing: '0.15em' }}>
             TARGET: HUMANOID — ML ENGINEER — HMND01
           </div>
           <div
