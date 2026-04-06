@@ -465,7 +465,7 @@ function ResourceLink({ res, color, t }) {
         display: 'block',
         padding: '8px 12px',
         background: t.bg4,
-        border: '1px solid ' + (hovered ? color + '40' : '#1e1e1e'),
+        border: '1px solid ' + (hovered ? color + '40' : t.border),
         marginBottom: 6,
         fontSize: 11,
         color: hovered ? color : '#aaa',
