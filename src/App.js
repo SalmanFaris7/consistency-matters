@@ -701,7 +701,7 @@ export default function TrainingPlan() {
         style={{
           borderBottom: `1px solid ${t.border}`,
           padding: '40px 32px 32px',
-          background: 'linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%)',
+          background: 'linear-gradient(180deg, t.bg2 0%, t.bg 100%)',
         }}
       >
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
